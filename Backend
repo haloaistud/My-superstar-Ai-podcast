@@ -1,0 +1,575 @@
+#!/usr/bin/env python3
+"""
+Superstar Podcast Hub - Flask Backend API
+Complete backend system for podcast streaming and management
+"""
+
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, verify_jwt_in_request, get_jwt_identity
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import os
+import json
+import sqlite3
+import threading
+import time
+from datetime import datetime, timedelta
+import uuid
+import mimetypes
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'your-secret-key-change-in-production'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
+
+# Initialize extensions
+jwt = JWTManager(app)
+CORS(app, origins=['*'])
+
+# Create upload directories
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs('uploads/podcasts', exist_ok=True)
+os.makedirs('uploads/thumbnails', exist_ok=True)
+
+# Database setup
+def init_database():
+    """Initialize SQLite database with required tables"""
+    conn = sqlite3.connect('podcast_hub.db')
+    cursor = conn.cursor()
+    
+    # Users table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            avatar TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_active BOOLEAN DEFAULT TRUE
+        )
+    ''')
+    
+    # Podcasts table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS podcasts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            author TEXT NOT NULL,
+            category TEXT NOT NULL,
+            audio_file TEXT NOT NULL,
+            thumbnail TEXT,
+            duration INTEGER DEFAULT 0,
+            file_size INTEGER DEFAULT 0,
+            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            play_count INTEGER DEFAULT 0,
+            user_id INTEGER,
+            is_live BOOLEAN DEFAULT FALSE,
+            status TEXT DEFAULT 'published',
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Listening sessions table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS listening_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            podcast_id INTEGER,
+            progress INTEGER DEFAULT 0,
+            completed BOOLEAN DEFAULT FALSE,
+            last_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (podcast_id) REFERENCES podcasts (id)
+        )
+    ''')
+    
+    # Favorites table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS favorites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            podcast_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (podcast_id) REFERENCES podcasts (id),
+            UNIQUE(user_id, podcast_id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Database helper functions
+def get_db_connection():
+    """Get database connection"""
+    conn = sqlite3.connect('podcast_hub.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def execute_query(query, params=None, fetch_one=False, fetch_all=False):
+    """Execute database query with error handling"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        
+        if fetch_one:
+            result = cursor.fetchone()
+            conn.close()
+            return dict(result) if result else None
+        elif fetch_all:
+            result = cursor.fetchall()
+            conn.close()
+            return [dict(row) for row in result]
+        else:
+            conn.commit()
+            result = cursor.lastrowid
+            conn.close()
+            return result
+    except Exception as e:
+        print(f"Database error: {e}")
+        return None
+
+# Authentication routes
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    """User registration endpoint"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['username', 'email', 'password']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'{field} is required'}), 400
+        
+        # Check if user exists
+        existing_user = execute_query(
+            "SELECT id FROM users WHERE username = ? OR email = ?",
+            (data['username'], data['email']),
+            fetch_one=True
+        )
+        
+        if existing_user:
+            return jsonify({'error': 'User already exists'}), 409
+        
+        # Create new user
+        password_hash = generate_password_hash(data['password'])
+        user_id = execute_query(
+            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+            (data['username'], data['email'], password_hash)
+        )
+        
+        if user_id:
+            # Create access token
+            access_token = create_access_token(identity=user_id)
+            
+            return jsonify({
+                'message': 'User registered successfully',
+                'access_token': access_token,
+                'user': {
+                    'id': user_id,
+                    'username': data['username'],
+                    'email': data['email']
+                }
+            }), 201
+        else:
+            return jsonify({'error': 'Failed to create user'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """User login endpoint"""
+    try:
+        data = request.get_json()
+        
+        if not data.get('email') or not data.get('password'):
+            return jsonify({'error': 'Email and password are required'}), 400
+        
+        # Find user
+        user = execute_query(
+            "SELECT * FROM users WHERE email = ? AND is_active = TRUE",
+            (data['email'],),
+            fetch_one=True
+        )
+        
+        if not user or not check_password_hash(user['password_hash'], data['password']):
+            return jsonify({'error': 'Invalid credentials'}), 401
+        
+        # Create access token
+        access_token = create_access_token(identity=user['id'])
+        
+        return jsonify({
+            'message': 'Login successful',
+            'access_token': access_token,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'avatar': user['avatar']
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Podcast routes
+@app.route('/api/podcasts', methods=['GET'])
+def get_podcasts():
+    """Get all podcasts with optional filtering"""
+    try:
+        # Get query parameters
+        category = request.args.get('category')
+        search = request.args.get('search')
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        
+        # Build query
+        query = "SELECT * FROM podcasts WHERE status = 'published'"
+        params = []
+        
+        if category:
+            query += " AND category = ?"
+            params.append(category)
+        
+        if search:
+            query += " AND (title LIKE ? OR description LIKE ? OR author LIKE ?)"
+            search_term = f"%{search}%"
+            params.extend([search_term, search_term, search_term])
+        
+        query += " ORDER BY upload_date DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+        
+        podcasts = execute_query(query, params, fetch_all=True)
+        
+        return jsonify({
+            'podcasts': podcasts,
+            'total': len(podcasts),
+            'limit': limit,
+            'offset': offset
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/podcasts/<int:podcast_id>', methods=['GET'])
+def get_podcast(podcast_id):
+    """Get single podcast by ID"""
+    try:
+        podcast = execute_query(
+            "SELECT * FROM podcasts WHERE id = ? AND status = 'published'",
+            (podcast_id,),
+            fetch_one=True
+        )
+        
+        if not podcast:
+            return jsonify({'error': 'Podcast not found'}), 404
+        
+        # Increment play count
+        execute_query(
+            "UPDATE podcasts SET play_count = play_count + 1 WHERE id = ?",
+            (podcast_id,)
+        )
+        
+        return jsonify({'podcast': podcast}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/podcasts/upload', methods=['POST'])
+def upload_podcast():
+    """Upload new podcast"""
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        # Check if files are present
+        if 'audio' not in request.files:
+            return jsonify({'error': 'Audio file is required'}), 400
+        
+        audio_file = request.files['audio']
+        thumbnail_file = request.files.get('thumbnail')
+        
+        if audio_file.filename == '':
+            return jsonify({'error': 'No audio file selected'}), 400
+        
+        # Validate file types
+        allowed_audio_types = ['audio/mpeg', 'audio/wav', 'audio/mp3']
+        if audio_file.content_type not in allowed_audio_types:
+            return jsonify({'error': 'Invalid audio file type'}), 400
+        
+        # Generate unique filenames
+        audio_filename = f"{uuid.uuid4().hex}_{secure_filename(audio_file.filename)}"
+        audio_path = os.path.join('uploads/podcasts', audio_filename)
+        
+        thumbnail_filename = None
+        if thumbnail_file and thumbnail_file.filename:
+            thumbnail_filename = f"{uuid.uuid4().hex}_{secure_filename(thumbnail_file.filename)}"
+            thumbnail_path = os.path.join('uploads/thumbnails', thumbnail_filename)
+            thumbnail_file.save(thumbnail_path)
+        
+        # Save audio file
+        audio_file.save(audio_path)
+        
+        # Get file size
+        file_size = os.path.getsize(audio_path)
+        
+        # Get form data
+        title = request.form.get('title', '')
+        description = request.form.get('description', '')
+        author = request.form.get('author', '')
+        category = request.form.get('category', 'General')
+        
+        # Insert podcast record
+        podcast_id = execute_query(
+            """INSERT INTO podcasts 
+               (title, description, author, category, audio_file, thumbnail, file_size, user_id) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (title, description, author, category, audio_filename, thumbnail_filename, file_size, user_id)
+        )
+        
+        if podcast_id:
+            return jsonify({
+                'message': 'Podcast uploaded successfully',
+                'podcast_id': podcast_id
+            }), 201
+        else:
+            return jsonify({'error': 'Failed to save podcast'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/podcasts/stream/<int:podcast_id>')
+def stream_podcast(podcast_id):
+    """Stream podcast audio file"""
+    try:
+        podcast = execute_query(
+            "SELECT audio_file FROM podcasts WHERE id = ?",
+            (podcast_id,),
+            fetch_one=True
+        )
+        
+        if not podcast:
+            return jsonify({'error': 'Podcast not found'}), 404
+        
+        audio_path = os.path.join('uploads/podcasts', podcast['audio_file'])
+        
+        if not os.path.exists(audio_path):
+            return jsonify({'error': 'Audio file not found'}), 404
+        
+        return send_file(audio_path, as_attachment=False)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# User interaction routes
+@app.route('/api/favorites', methods=['POST'])
+def add_favorite():
+    """Add podcast to favorites"""
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        data = request.get_json()
+        podcast_id = data.get('podcast_id')
+        
+        if not podcast_id:
+            return jsonify({'error': 'podcast_id is required'}), 400
+        
+        # Check if already favorited
+        existing = execute_query(
+            "SELECT id FROM favorites WHERE user_id = ? AND podcast_id = ?",
+            (user_id, podcast_id),
+            fetch_one=True
+        )
+        
+        if existing:
+            return jsonify({'error': 'Podcast already in favorites'}), 409
+        
+        # Add to favorites
+        favorite_id = execute_query(
+            "INSERT INTO favorites (user_id, podcast_id) VALUES (?, ?)",
+            (user_id, podcast_id)
+        )
+        
+        if favorite_id:
+            return jsonify({'message': 'Added to favorites'}), 201
+        else:
+            return jsonify({'error': 'Failed to add to favorites'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/favorites', methods=['GET'])
+def get_favorites():
+    """Get user's favorite podcasts"""
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        favorites = execute_query(
+            """SELECT p.*, f.created_at as favorited_at
+               FROM podcasts p
+               JOIN favorites f ON p.id = f.podcast_id
+               WHERE f.user_id = ?
+               ORDER BY f.created_at DESC""",
+            (user_id,),
+            fetch_all=True
+        )
+        
+        return jsonify({'favorites': favorites}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/listening-progress', methods=['POST'])
+def update_listening_progress():
+    """Update listening progress for a podcast"""
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        data = request.get_json()
+        podcast_id = data.get('podcast_id')
+        progress = data.get('progress', 0)
+        completed = data.get('completed', False)
+        
+        if not podcast_id:
+            return jsonify({'error': 'podcast_id is required'}), 400
+        
+        # Update or insert listening session
+        existing_session = execute_query(
+            "SELECT id FROM listening_sessions WHERE user_id = ? AND podcast_id = ?",
+            (user_id, podcast_id),
+            fetch_one=True
+        )
+        
+        if existing_session:
+            execute_query(
+                """UPDATE listening_sessions 
+                   SET progress = ?, completed = ?, last_played = CURRENT_TIMESTAMP
+                   WHERE id = ?""",
+                (progress, completed, existing_session['id'])
+            )
+        else:
+            execute_query(
+                """INSERT INTO listening_sessions (user_id, podcast_id, progress, completed)
+                   VALUES (?, ?, ?, ?)""",
+                (user_id, podcast_id, progress, completed)
+            )
+        
+        return jsonify({'message': 'Progress updated successfully'}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Analytics and stats routes
+@app.route('/api/stats/dashboard', methods=['GET'])
+def get_dashboard_stats():
+    """Get dashboard statistics"""
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        # Get user's listening stats
+        listening_stats = execute_query(
+            """SELECT 
+                COUNT(*) as total_listened,
+                COUNT(CASE WHEN completed = 1 THEN 1 END) as completed_podcasts,
+                AVG(progress) as avg_progress
+               FROM listening_sessions 
+               WHERE user_id = ?""",
+            (user_id,),
+            fetch_one=True
+        )
+        
+        # Get favorite count
+        favorite_count = execute_query(
+            "SELECT COUNT(*) as count FROM favorites WHERE user_id = ?",
+            (user_id,),
+            fetch_one=True
+        )
+        
+        # Get recent activity
+        recent_activity = execute_query(
+            """SELECT p.title, p.author, ls.last_played, ls.progress
+               FROM listening_sessions ls
+               JOIN podcasts p ON ls.podcast_id = p.id
+               WHERE ls.user_id = ?
+               ORDER BY ls.last_played DESC
+               LIMIT 5""",
+            (user_id,),
+            fetch_all=True
+        )
+        
+        stats = {
+            'listening_stats': listening_stats or {'total_listened': 0, 'completed_podcasts': 0, 'avg_progress': 0},
+            'favorite_count': favorite_count['count'] if favorite_count else 0,
+            'recent_activity': recent_activity or []
+        }
+        
+        return jsonify({'stats': stats}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'version': '1.0.0'
+    }), 200
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Endpoint not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
+
+@app.errorhandler(413)
+def file_too_large(error):
+    return jsonify({'error': 'File too large'}), 413
+
+# Initialize database on startup
+init_database()
+
+if __name__ == '__main__':
+    print("🎙️ Starting Superstar Podcast Hub Backend...")
+    print("📡 Server running on http://localhost:5000")
+    print("📊 API documentation available at /api/health")
+    
+    # Create sample data for testing
+    try:
+        sample_user = execute_query(
+            "SELECT id FROM users WHERE username = 'demo'",
+            fetch_one=True
+        )
+        
+        if not sample_user:
+            password_hash = generate_password_hash('demo123')
+            execute_query(
+                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+                ('demo', 'demo@example.com', password_hash)
+            )
+            print("✅ Demo user created (username: demo, password: demo123)")
+    except:
+        pass
+    
+    app.run(debug=True, host='0.0.0.0', port=5000)
