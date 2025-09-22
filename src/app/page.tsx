@@ -7,7 +7,7 @@ const WelcomePage = () => {
 
             {/* Hero Section */}
             <section className="min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-r from-purple-600 to-indigo-700">
-                <h1 className="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-300 via-slate-400 to-slate-500 animate-fade-in-3d text-shadow-3d">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-300 via-slate-400 to-slate-500 animate-fade-in-3d text-shadow-3d">
                     MySuperstarAIpodcast: Your Stage. Your Story. Your Views. Your Podcast. You Superstar.
                 </h1>
                 <p className="text-xl md:text-2xl mb-8 max-w-2xl">
