@@ -30,10 +30,10 @@ const ViewerMode = () => {
               id="videoPlayer"
             >
               <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
-                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm">
+                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
                   <Users className="h-4 w-4" /> 8,192
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm">
+                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
                   <Video className="h-4 w-4" /> 1080p
                 </div>
               </div>
@@ -88,7 +88,7 @@ export default function Home() {
 
   const switchRole = (newRole: Role) => {
     if (newRole === 'broadcaster') {
-      window.location.href = '/broadcaster';
+      window.location.href = '/login';
     } else if (newRole === 'admin') {
       window.location.href = '/admin';
     } else {

@@ -9,11 +9,16 @@ import { PlatformRecommender } from '@/components/platform-recommender';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BarChart, Clapperboard, DollarSign, Rss, Star } from 'lucide-react';
+import { BarChart, Camera, Clapperboard, DollarSign, Video, AlertTriangle } from 'lucide-react';
 import { ContentSuggester } from '@/components/content-suggester';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const BroadcasterDashboard: React.FC = () => {
     const router = useRouter();
+    const { toast } = useToast();
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
 
     React.useEffect(() => {
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -22,6 +27,29 @@ const BroadcasterDashboard: React.FC = () => {
         }
     }, [router]);
     
+    React.useEffect(() => {
+        const getCameraPermission = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            setHasCameraPermission(true);
+    
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+            setHasCameraPermission(false);
+            toast({
+              variant: 'destructive',
+              title: 'Camera Access Denied',
+              description: 'Please enable camera permissions in your browser settings to use this feature.',
+            });
+          }
+        };
+    
+        getCameraPermission();
+      }, [toast]);
+
     const handleLogout = () => {
         sessionStorage.removeItem('isLoggedIn');
         router.push('/');
@@ -50,11 +78,11 @@ const BroadcasterDashboard: React.FC = () => {
                         </CardHeader>
                         <CardContent className="streaming-panel !p-6">
                             <div className="streaming-controls">
-                                <button className="big-btn start">🚀 Start Streaming</button>
-                                <button className="big-btn stop">🛑 Stop Streaming</button>
+                                <button className="big-btn start">🚀 Go Live</button>
+                                <button className="big-btn stop">🛑 End Stream</button>
                             </div>
                             <div className="audio-visualizer">
-                                {Array.from({ length: 30 }).map((_, i) => (
+                                {Array.from({ length: 40 }).map((_, i) => (
                                     <div key={i} className="audio-bar" style={{ animationDelay: `${i * 0.05}s` }}></div>
                                 ))}
                             </div>
@@ -65,6 +93,7 @@ const BroadcasterDashboard: React.FC = () => {
                     <Card>
                         <CardHeader>
                             <CardTitle>AI-Powered Tools</CardTitle>
+                             <CardDescription>Leverage AI to enhance your content and reach.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <PlatformRecommender />
@@ -82,13 +111,28 @@ const BroadcasterDashboard: React.FC = () => {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-3">
-                                <BarChart className="h-6 w-6 text-primary" />
-                                Live Stats
+                                <Video className="h-6 w-6 text-primary" />
+                                Stream Preview
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                             <div className="video-player playing !h-64">
-                                <div className="channel-info">Your Stream Preview</div>
+                             <div className="aspect-video bg-secondary rounded-md flex items-center justify-center relative">
+                                <video ref={videoRef} className="w-full h-full rounded-md" autoPlay muted playsInline />
+                                {hasCameraPermission === false && (
+                                     <Alert variant="destructive" className="m-4">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <AlertTitle>Camera Access Required</AlertTitle>
+                                        <AlertDescription>
+                                          Please allow camera access to use this feature.
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                                 {hasCameraPermission === null && (
+                                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                        <Camera className="h-8 w-8" />
+                                        <span>Awaiting camera...</span>
+                                     </div>
+                                 )}
                             </div>
                         </CardContent>
                     </Card>
@@ -98,6 +142,7 @@ const BroadcasterDashboard: React.FC = () => {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-3"><DollarSign className="h-6 w-6 text-primary" /> Monetization</CardTitle>
+                            <CardDescription>Manage your channel's subscriptions and donations.</CardDescription>
                         </CardHeader>
                          <CardContent>
                             <MonetizationSettings />

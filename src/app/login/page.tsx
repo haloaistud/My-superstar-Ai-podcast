@@ -35,13 +35,13 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <Card className="w-full max-w-md">
+        <div className="flex items-center justify-center min-h-screen bg-background p-4">
+            <Card className="w-full max-w-md shadow-2xl">
                 <CardHeader className="text-center">
                     <div className="flex justify-center mb-4">
                         <Clapperboard className="h-12 w-12 text-primary" />
                     </div>
-                    <CardTitle>Broadcaster Login</CardTitle>
+                    <CardTitle className="font-headline text-3xl">Broadcaster Login</CardTitle>
                     <CardDescription>Access your Superstar Podcast Hub dashboard</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -73,9 +73,9 @@ export default function LoginPage() {
                         </Button>
                     </form>
                      <div className="mt-4 text-center text-sm">
-                        <a href="#" className="underline" onClick={() => router.push('/')}>
+                        <Button variant="link" onClick={() => router.push('/')}>
                             Back to Home
-                        </a>
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
