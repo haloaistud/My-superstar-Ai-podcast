@@ -32,6 +32,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, BookCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   logType: z.enum(['error', 'debug', 'info', 'warning']),
@@ -83,7 +84,10 @@ export default function MaintenanceLogPage() {
           <div className="logo">MAINTENANCE LOG</div>
           <div className="subtitle">System Debugging & Error Handling</div>
         </div>
-        <Button onClick={() => router.push('/')}>Go Home</Button>
+        <div className="flex gap-2 justify-center">
+            <Button onClick={() => router.push('/admin')}>Admin Dashboard</Button>
+            <Button onClick={() => router.push('/')}>Go Home</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

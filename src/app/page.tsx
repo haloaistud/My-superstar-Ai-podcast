@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Clapperboard, Eye, Settings, Users, Video, Mic, Search, ListMusic, UserPlus } from 'lucide-react';
+import { Clapperboard, Eye, Settings, Users, Video, Search, ListMusic, UserPlus } from 'lucide-react';
 
 import { ChatPanel } from '@/components/chat-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,20 +22,7 @@ const ViewerMode = () => {
   return (
     <div id="viewerMode" className="main-content active">
       <div className="viewer-grid">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>🎙️ The Main Event</span>
-              <div className="flex items-center gap-2 text-sm font-medium text-red-400">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
-                LIVE
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="lg:col-span-2">
             <div
               className={`video-player ${
                 isPlaying ? 'playing' : ''
@@ -58,18 +45,18 @@ const ViewerMode = () => {
                 {isPlaying ? '❚❚' : '▶️'}
               </button>
               <div className="channel-info">
-                <span id="currentChannelInfo">
-                  RealTalk 24/7 - Raw conversations, interviews, and real talk about life, culture, and everything in between.
-                </span>
+                  <h3 className="font-bold text-lg">🎙️ The Main Event: RealTalk 24/7</h3>
+                  <p className="text-sm opacity-80">
+                    Raw conversations, interviews, and real talk about life, culture, and everything in between.
+                  </p>
               </div>
                {isPlaying && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
               )}
             </div>
-          </CardContent>
-        </Card>
+        </div>
         <div className="space-y-8">
-            <Tabs defaultValue="chat">
+            <Tabs defaultValue="chat" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="chat">💬 Chat</TabsTrigger>
                 <TabsTrigger value="streamers">
@@ -79,7 +66,7 @@ const ViewerMode = () => {
                   <UserPlus className="mr-2 h-4 w-4" /> Queue
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="chat">
+              <TabsContent value="chat" className="flex-grow">
                 <ChatPanel />
               </TabsContent>
               <TabsContent value="streamers">
@@ -113,8 +100,8 @@ export default function Home() {
     <div className="container">
       <div className="header">
         <div className="header-content">
-          <div className="logo">Superstar Podcast Hub</div>
-          <p className="max-w-2xl mx-auto my-4 text-center text-lg text-gray-300">
+          <div className="logo">Superstar Stream Center</div>
+          <p className="max-w-2xl mx-auto my-4 text-center text-lg text-muted-foreground">
             Welcome to the ultimate destination for live podcasting. Discover new streamers, join the conversation, and even become a guest on the show.
           </p>
           <div className="relative mx-auto max-w-md my-6">
