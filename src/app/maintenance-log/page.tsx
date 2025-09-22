@@ -33,6 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, BookCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
   logType: z.enum(['error', 'debug', 'info', 'warning']),
@@ -134,7 +135,7 @@ export default function MaintenanceLogPage() {
                     <FormItem>
                       <FormLabel>Component / Feature</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., ChatPanel, WebRTC, API" {...field} />
+                        <Input placeholder="e.g., ChatPanel, WebRTC, API" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
