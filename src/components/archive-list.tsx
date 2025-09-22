@@ -1,0 +1,59 @@
+'use client'
+
+import * as React from 'react';
+import Image from 'next/image';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Badge } from './ui/badge';
+import { Eye, Calendar } from 'lucide-react';
+
+const archives = [
+    { id: 1, title: "Epic Boss Battle & New World Record", views: "1.2M", date: "2 days ago", duration: "4:12:33", thumbnail: PlaceHolderImages[4].imageUrl, hint: "gaming win"},
+    { id: 2, title: "Building a Real-time Chat App with Next.js", views: "450k", date: "5 days ago", duration: "2:30:10", thumbnail: PlaceHolderImages[7].imageUrl, hint: "coding screen"},
+    { id: 3, title: "Chill Saturday Stream: Q&A and Community Games", views: "89k", date: "1 week ago", duration: "3:05:45", thumbnail: PlaceHolderImages[5].imageUrl, hint: "podcast desk"},
+    { id: 4, title: "Digital Painting from Scratch: Fantasy Landscape", views: "210k", date: "2 weeks ago", duration: "5:22:01", thumbnail: PlaceHolderImages[8].imageUrl, hint: "art digital"},
+    { id: 5, title: "My First 24-Hour Charity Stream!", views: "2.5M", date: "3 weeks ago", duration: "24:01:50", thumbnail: PlaceHolderImages[6].imageUrl, hint: "celebration confetti"},
+    { id: 6, title: "Deep Dive into Modern CSS Techniques", views: "155k", date: "1 month ago", duration: "1:55:19", thumbnail: PlaceHolderImages[7].imageUrl, hint: "developer code"},
+];
+
+export function ArchiveList() {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Past Broadcasts</CardTitle>
+                <CardDescription>Review, edit, and publish your past streams.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {archives.map(archive => (
+                        <div key={archive.id} className="group flex flex-col overflow-hidden rounded-lg border">
+                             <div className="relative aspect-video overflow-hidden">
+                                <Image 
+                                    src={archive.thumbnail} 
+                                    alt={archive.title} 
+                                    fill
+                                    data-ai-hint={archive.hint}
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <Badge className="absolute bottom-2 right-2">{archive.duration}</Badge>
+                            </div>
+                            <div className="p-4 bg-card flex flex-col flex-1">
+                                <h3 className="font-semibold leading-snug truncate mb-2">{archive.title}</h3>
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto">
+                                    <div className="flex items-center gap-1">
+                                        <Eye className="h-3 w-3" />
+                                        <span>{archive.views} views</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{archive.date}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
