@@ -1,3 +1,4 @@
+// All client-side code, since we're using hooks and event handlers.
 'use client';
 
 import * as React from 'react';
@@ -52,256 +53,173 @@ import { ChatPanel } from '@/components/chat-panel';
 import { ArchiveList } from '@/components/archive-list';
 import { MonetizationSettings } from '@/components/monetization-settings';
 
-type View = 'dashboard' | 'archives' | 'settings';
+type Role = 'viewer' | 'broadcaster' | 'admin';
+
+const ViewerMode = () => {
+    const [selectedChannel, setSelectedChannel] = React.useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [indieViewers, setIndieViewers] = React.useState(2847);
+    const [realtalkViewers, setRealtalkViewers] = React.useState(5123);
+
+    const togglePlayback = () => setIsPlaying(!isPlaying);
+
+    const selectChannel = (channel: string) => {
+        setSelectedChannel(channel);
+        setIsPlaying(true);
+    };
+
+    const ChannelCard = ({id, name, status, description, viewers, type, time, onClick, children}: any) => {
+        const isSelected = selectedChannel === id;
+        const statusClass = status.toLowerCase();
+
+        return (
+            <div className={`channel-card ${id} ${isSelected ? 'selected' : ''}`} onClick={() => onClick(id)}>
+                <div className="channel-header">
+                    <div className="channel-name">{name}</div>
+                    <div className={`channel-status ${statusClass}`}>{status}</div>
+                </div>
+                <div className="channel-description">{description}</div>
+                <div className="channel-stats">
+                    <div className="stat-item">👥 <span>{viewers.toLocaleString()}</span> {status === 'SCHEDULED' ? 'waiting' : (type === 'Audio Only' ? 'listening' : 'watching')}</div>
+                    <div className="stat-item">{type.startsWith('📹') ? '📹 Video + Audio' : '🎵 Audio Only'}</div>
+                    <div className="stat-item">⏱️ {time}</div>
+                </div>
+                {children}
+            </div>
+        )
+    }
+
+    const AudioVisualizer = ({id}: {id: string}) => (
+        <div className="audio-visualizer" id={`${id}Visualizer`}>
+            {Array.from({length: 15}).map((_, i) => (
+                 <div key={i} className="audio-bar" style={{animationDelay: `${i * 0.1}s`}}></div>
+            ))}
+        </div>
+    )
+
+    const currentChannel = [
+        { id: 'indie', name: '🎵 IndieVibe FM', status: 'LIVE', description: 'Music-focused channel featuring indie artists, underground hits, and live DJ sets. Discover new sounds and classic vibes 24/7.', viewers: indieViewers, type: '🎵 Audio Only', time: '3h 24m' },
+        { id: 'realtalk', name: '🗣️ RealTalk 24/7', status: 'LIVE', description: 'Raw conversations, interviews, and real talk about life, culture, and everything in between. Join the discussion!', viewers: realtalkViewers, type: '📹 Video + Audio', time: '1h 47m' },
+        { id: 'nerd', name: '🕹️ NerdZone Cast', status: 'SCHEDULED', description: 'Gaming reviews, tech discussions, and nerd culture deep dives. Where geeks gather to share their passion.', viewers: 0, type: '📹 Video + Audio', time: 'Starts at 8 PM' }
+    ].find(c => c.id === selectedChannel);
+
+
+    return (
+        <div id="viewerMode" className="main-content active">
+            <div className="channels-grid">
+                <ChannelCard id="indie" name="🎵 IndieVibe FM" status="LIVE" description="Music-focused channel featuring indie artists, underground hits, and live DJ sets. Discover new sounds and classic vibes 24/7." viewers={indieViewers} type="🎵 Audio Only" time="3h 24m" onClick={selectChannel}>
+                     <AudioVisualizer id="indie" />
+                </ChannelCard>
+                 <ChannelCard id="realtalk" name="🗣️ RealTalk 24/7" status="LIVE" description="Raw conversations, interviews, and real talk about life, culture, and everything in between. Join the discussion!" viewers={realtalkViewers} type="📹 Video + Audio" time="1h 47m" onClick={selectChannel}>
+                     <AudioVisualizer id="realtalk" />
+                </ChannelCard>
+                <ChannelCard id="nerd" name="🕹️ NerdZone Cast" status="SCHEDULED" description="Gaming reviews, tech discussions, and nerd culture deep dives. Where geeks gather to share their passion." viewers={0} type="📹 Video + Audio" time="Starts at 8 PM" onClick={selectChannel}>
+                    <AudioVisualizer id="nerd" />
+                </ChannelCard>
+            </div>
+
+            <div className="viewer-grid">
+                 <div className={`video-player ${currentChannel ? (currentChannel.type === '🎵 Audio Only' ? 'audio-only' : '') : ''} ${isPlaying ? 'playing' : ''}`} id="videoPlayer">
+                    <button className="play-button" id="playButton" onClick={togglePlayback}>{isPlaying ? '❚❚' : '▶️'}</button>
+                    <div className="channel-info">
+                        <span id="currentChannelInfo">{currentChannel?.name || 'Select a channel to start listening'}</span>
+                    </div>
+                </div>
+                {/* We'll use the ChatPanel component we already have, adapting it later */}
+                <ChatPanel />
+            </div>
+        </div>
+    );
+};
+
+const BroadcasterMode = () => (
+    <div id="broadcasterMode" className="main-content">
+        <div className="streaming-panel">
+             <div className="streaming-controls">
+                <button className="big-btn start">🚀 Start Streaming</button>
+                <button className="big-btn stop">🛑 Stop Streaming</button>
+            </div>
+            <div className="audio-visualizer">
+                {Array.from({length: 30}).map((_, i) => (
+                    <div key={i} className="audio-bar" style={{animationDelay: `${i * 0.05}s`}}></div>
+                ))}
+            </div>
+        </div>
+        <div className="viewer-grid">
+            <div className="video-player playing">
+                <div className="channel-info">Your Stream Preview</div>
+            </div>
+            <ChatPanel />
+        </div>
+    </div>
+);
+
+const AdminMode = () => (
+    <div id="adminMode" className="main-content">
+        <div className="admin-panel">
+            <div className="admin-card">
+                <h3>Platform Statistics</h3>
+                <div className="stat-row"><span>Total Users:</span> <strong>15,789</strong></div>
+                <div className="stat-row"><span>Live Channels:</span> <strong>2</strong></div>
+                <div className="stat-row"><span>Peak Viewers (24h):</span> <strong>8,192</strong></div>
+                <div className="stat-row"><span>Server Uptime:</span> <strong>99.98%</strong></div>
+            </div>
+            <div className="admin-card">
+                <h3>Live Channels</h3>
+                <div className="stat-row"><span>IndieVibe FM</span> <button className="control-btn danger">Shutdown</button></div>
+                <div className="stat-row"><span>RealTalk 24/7</span> <button className="control-btn danger">Shutdown</button></div>
+            </div>
+             <div className="admin-card">
+                <h3>System Control</h3>
+                <button className="control-btn">Reboot Media Server</button>
+                <button className="control-btn success mt-2">Send Global Notification</button>
+            </div>
+        </div>
+    </div>
+);
+
 
 export default function Home() {
-  const [isStreaming, setIsStreaming] = React.useState(false);
-  const [view, setView] = React.useState<View>('dashboard');
-  const isMobile = useIsMobile();
+    const [role, setRole] = React.useState<Role>('viewer');
 
-  const renderView = () => {
-    switch (view) {
-      case 'dashboard':
-        return <DashboardView isStreaming={isStreaming} />;
-      case 'archives':
-        return <ArchiveList />;
-      case 'settings':
-        return <MonetizationSettings />;
-      default:
-        return <DashboardView isStreaming={isStreaming} />;
-    }
-  };
-  
-  const navItems = [
-    { name: 'Dashboard', icon: LayoutGrid, view: 'dashboard' as View },
-    { name: 'Archives', icon: Archive, view: 'archives' as View },
-    { name: 'Settings', icon: Settings, view: 'settings' as View },
-  ];
+    const switchRole = (newRole: Role) => {
+        setRole(newRole);
+    };
 
-  const SidebarNav = ({ inSheet = false }: { inSheet?: boolean }) => (
-    <nav className="flex flex-col gap-2 px-4 mt-8">
-      {navItems.map((item) => (
-        <Button
-          key={item.name}
-          variant={view === item.view ? 'secondary' : 'ghost'}
-          className="justify-start gap-3"
-          onClick={() => {
-            setView(item.view);
-            if (inSheet && isMobile) {
-              // Assuming a way to close the sheet, this is a placeholder
-            }
-          }}
-        >
-          <item.icon className="h-5 w-5" />
-          <span>{item.name}</span>
-        </Button>
-      ))}
-    </nav>
-  );
+    const renderContent = () => {
+        switch (role) {
+            case 'viewer':
+                return <ViewerMode />;
+            case 'broadcaster':
+                return <BroadcasterMode />;
+            case 'admin':
+                return <AdminMode />;
+            default:
+                return <ViewerMode />;
+        }
+    };
 
-  return (
-    <div className="min-h-screen w-full bg-background grid grid-cols-1 md:grid-cols-[280px_1fr]">
-      <aside className="hidden md:flex flex-col border-r bg-muted/40">
-        <div className="flex h-16 items-center px-6 border-b">
-          <Clapperboard className="h-7 w-7 text-primary" />
-          <h1 className="ml-3 text-xl font-headline font-bold">
-            Superstar Stream
-          </h1>
-        </div>
-        <SidebarNav />
-      </aside>
+    return (
+        <div className="container">
+            <div className="header">
+                <div className="header-content">
+                    <div className="logo">🌟 SUPERSTAR PODCAST HUB</div>
+                    <div className="subtitle">Yardie-Style Streaming • Podcast Channels • Live Community</div>
 
-      <div className="flex flex-col">
-        <header className="flex h-16 items-center gap-4 border-b bg-muted/40 px-6">
-          {isMobile && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle navigation menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader className="h-16 flex flex-row items-center">
-                    <Clapperboard className="h-7 w-7 text-primary" />
-                    <h1 className="ml-3 text-xl font-headline font-bold">
-                        Superstar Stream
-                    </h1>
-                </SheetHeader>
-                <SidebarNav inSheet />
-              </SheetContent>
-            </Sheet>
-          )}
-
-          <div className="flex-1">
-            <h2 className="text-2xl font-headline font-semibold capitalize">{view}</h2>
-          </div>
-
-          <Button
-            onClick={() => setIsStreaming((prev) => !prev)}
-            className={cn("gap-2 w-40 transition-all duration-300", isStreaming && 'bg-red-600 hover:bg-red-700')}
-          >
-            <Mic className="h-5 w-5" />
-            <span>{isStreaming ? 'Stop Stream' : 'Start Stream'}</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar>
-                  <AvatarImage
-                    src={PlaceHolderImages[0].imageUrl}
-                    alt="User avatar"
-                  />
-                  <AvatarFallback>SS</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-
-        <main className="flex-1 overflow-auto p-4 md:p-8 bg-background">
-          {renderView()}
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function DashboardView({ isStreaming }: { isStreaming: boolean }) {
-  const [viewerCount, setViewerCount] = React.useState(1357);
-
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isStreaming) {
-      interval = setInterval(() => {
-        setViewerCount((prev) => prev + Math.floor(Math.random() * 11) - 5);
-      }, 2000);
-    } else {
-      setViewerCount(1357);
-    }
-    return () => clearInterval(interval);
-  }, [isStreaming]);
-
-  return (
-    <Tabs defaultValue="broadcaster" className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <TabsList>
-          <TabsTrigger value="broadcaster" className="gap-2">
-            <Mic className="h-4 w-4" /> Broadcaster
-          </TabsTrigger>
-          <TabsTrigger value="viewer" className="gap-2">
-            <Users className="h-4 w-4" /> Viewer
-          </TabsTrigger>
-        </TabsList>
-        {isStreaming && (
-            <div className="flex items-center gap-2 text-red-500 animate-pulse">
-                <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                <span>LIVE</span>
-            </div>
-        )}
-        <div className="flex items-center gap-2 text-muted-foreground font-medium">
-          <Eye className="h-5 w-5" />
-          <span>
-            {isStreaming
-              ? viewerCount.toLocaleString()
-              : 'Offline'}
-          </span>
-        </div>
-      </div>
-
-      <TabsContent value="broadcaster">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Stream Preview</CardTitle>
-                <CardDescription>
-                  This is what your audience sees.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="aspect-video bg-card-foreground/10 rounded-lg flex items-center justify-center">
-                    {isStreaming ? (
-                        <Image
-                          src={PlaceHolderImages[4].imageUrl}
-                          width={1280}
-                          height={720}
-                          alt="Live Stream"
-                          data-ai-hint="gaming stream"
-                          className="rounded-lg object-cover"
-                        />
-                    ) : (
-                        <div className="text-center text-muted-foreground">
-                            <Clapperboard className="h-12 w-12 mx-auto mb-2" />
-                            <p>You are offline</p>
-                        </div>
-                    )}
+                    <div className="role-selector">
+                        <button className={`role-btn viewer ${role === 'viewer' ? 'active' : ''}`} onClick={() => switchRole('viewer')}>
+                            👀 Viewer Mode
+                        </button>
+                        <button className={`role-btn broadcaster ${role === 'broadcaster' ? 'active' : ''}`} onClick={() => switchRole('broadcaster')}>
+                            🎙️ Broadcaster Mode
+                        </button>
+                        <button className={`role-btn admin ${role === 'admin' ? 'active' : ''}`} onClick={() => switchRole('admin')}>
+                            ⚙️ Admin Mode
+                        </button>
+                    </div>
                 </div>
-              </CardContent>
-            </Card>
-            <PlatformRecommender />
-          </div>
-          <div className="lg:col-span-1">
-            <ChatPanel />
-          </div>
+            </div>
+            {renderContent()}
         </div>
-      </TabsContent>
-
-      <TabsContent value="viewer">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-             <Card className="h-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="text-primary h-6 w-6" />
-                        Recommended For You
-                    </CardTitle>
-                    <CardDescription>Discover new content and creators tailored to your taste.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ContentSuggester />
-                </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-             <Card>
-                 <CardHeader>
-                    <CardTitle>Top Channels</CardTitle>
-                 </CardHeader>
-                 <CardContent className="flex flex-col gap-4">
-                    {[
-                        { name: "GamerX", category: "Gaming", viewers: "12.1k", img: PlaceHolderImages[0].imageUrl },
-                        { name: "CreativeCoder", category: "Programming", viewers: "8.7k", img: PlaceHolderImages[1].imageUrl },
-                        { name: "MusicMaven", category: "Music", viewers: "5.2k", img: PlaceHolderImages[2].imageUrl },
-                        { name: "ArtisanAlly", category: "Art & Crafts", viewers: "3.9k", img: PlaceHolderImages[3].imageUrl },
-                    ].map(channel => (
-                        <div key={channel.name} className="flex items-center gap-4">
-                            <Avatar>
-                                <AvatarImage src={channel.img} />
-                                <AvatarFallback>{channel.name.substring(0,2)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                                <p className="font-semibold">{channel.name}</p>
-                                <p className="text-sm text-muted-foreground">{channel.category}</p>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-sm">
-                                <Users className="h-4 w-4" />
-                                {channel.viewers}
-                            </div>
-                        </div>
-                    ))}
-                 </CardContent>
-             </Card>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
-  );
+    );
 }

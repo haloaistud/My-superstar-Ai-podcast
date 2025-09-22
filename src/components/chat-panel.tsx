@@ -46,7 +46,7 @@ export function ChatPanel() {
         ...messages,
         {
           user: 'You',
-          avatar: Place-HolderImages[0].imageUrl,
+          avatar: PlaceHolderImages[0].imageUrl,
           text: newMessage,
         },
       ]);
@@ -55,52 +55,33 @@ export function ChatPanel() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle>Live Chat</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full max-h-[calc(100vh-25rem)] pr-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={msg.avatar} />
-                  <AvatarFallback>
-                    {msg.user.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-semibold">{msg.user}</p>
-                  <div
-                    className={cn(
-                      'text-sm p-2 rounded-lg mt-1',
-                      msg.user === 'You'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    )}
-                  >
+    <div className="chat-container">
+        <div className="chat-header">
+            <span>💬 Live Chat</span>
+            <span id="chatViewers">7,970 viewers</span>
+        </div>
+        <div className="chat-messages" id="chatMessages">
+            <div className="chat-message system">
+                <span className="username">System</span>
+                Welcome to the RealTalk 24/7! Be respectful.
+                <span className="timestamp">1m ago</span>
+            </div>
+             {messages.map((msg, index) => (
+                <div key={index} className="chat-message viewer">
+                    <span className="username">{msg.user}</span>
                     {msg.text}
-                  </div>
+                    <span className="timestamp">now</span>
                 </div>
-              </div>
             ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter>
-        <form onSubmit={handleSendMessage} className="flex w-full items-center space-x-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Send a message..."
-            className="flex-1"
-          />
-          <Button type="submit" size="icon">
-            <Send className="h-4 w-4" />
-          </Button>
+        </div>
+        <form onSubmit={handleSendMessage} className="chat-input">
+            <input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Send a message..."
+            />
+            <button type="submit">Send</button>
         </form>
-      </CardFooter>
-    </Card>
+    </div>
   );
 }

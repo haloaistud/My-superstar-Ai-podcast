@@ -32,6 +32,7 @@ export function ArchiveList() {
                                     src={archive.thumbnail} 
                                     alt={archive.title} 
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     data-ai-hint={archive.hint}
                                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
