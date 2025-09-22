@@ -51,8 +51,8 @@ export function PlatformRecommender() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      contentType: '',
-      audienceDemographics: '',
+      contentType: 'I stream competitive FPS games like Valorant and Apex Legends.',
+      audienceDemographics: 'My audience is primarily 16-24 year olds who are into esports and fast-paced action.',
     },
   });
 
@@ -77,107 +77,92 @@ export function PlatformRecommender() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="text-primary h-6 w-6" />
-            AI Platform Recommender
-          </CardTitle>
-          <CardDescription>
-            Let our AI help you choose the best platforms for your stream.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="contentType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content Type</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Live competitive gaming, casual art streams"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="audienceDemographics"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target Audience</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="e.g., Teenagers and young adults interested in esports"
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Wand2 className="mr-2 h-4 w-4" />
-                )}
-                Get Recommendations
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Platform Selection</CardTitle>
-          <CardDescription>
-            Choose where you want to stream.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div>
+        <h3 className="text-lg font-medium mb-4">Platform Recommender</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                        control={form.control}
+                        name="contentType"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Content Type</FormLabel>
+                            <FormControl>
+                            <Input
+                                placeholder="e.g., Live competitive gaming, casual art streams"
+                                {...field}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="audienceDemographics"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Target Audience</FormLabel>
+                            <FormControl>
+                            <Textarea
+                                placeholder="e.g., Teenagers and young adults interested in esports"
+                                className="resize-none"
+                                {...field}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={isLoading} className="w-full">
+                        {isLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                        <Wand2 className="mr-2 h-4 w-4" />
+                        )}
+                        Get Recommendations
+                    </Button>
+                    </form>
+                </Form>
+            </div>
+            
             <div className="space-y-4">
-            {platforms.map((platform) => (
-                <div key={platform.id} className="flex items-center space-x-3 rounded-md border p-4">
-                    <Checkbox id={platform.id} />
-                    <label
-                        htmlFor={platform.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 flex items-center gap-3"
-                    >
-                        {platform.icon}
-                        {platform.label}
-                    </label>
+                <h4 className="font-medium">Live Platforms</h4>
+                <div className="space-y-4">
+                    {platforms.map((platform) => (
+                        <div key={platform.id} className="flex items-center space-x-3 rounded-md border p-4">
+                            <Checkbox id={platform.id} />
+                            <label
+                                htmlFor={platform.id}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 flex items-center gap-3"
+                            >
+                                {platform.icon}
+                                {platform.label}
+                            </label>
+                        </div>
+                    ))}
                 </div>
-            ))}
-            </div>
 
-          {recommendation && (
-            <div className="mt-6 p-4 bg-secondary/50 rounded-lg">
-              <h4 className="font-semibold flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                AI Suggestion
-              </h4>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {recommendation.recommendedPlatforms.map((p) => (
-                  <Badge key={p} variant="secondary">{p}</Badge>
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {recommendation.reasoning}
-              </p>
+                {recommendation && (
+                    <div className="mt-6 p-4 bg-secondary/50 rounded-lg">
+                    <h4 className="font-semibold flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        AI Suggestion
+                    </h4>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                        {recommendation.recommendedPlatforms.map((p) => (
+                        <Badge key={p} variant="secondary">{p}</Badge>
+                        ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        {recommendation.reasoning}
+                    </p>
+                    </div>
+                )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
     </div>
   );
 }
