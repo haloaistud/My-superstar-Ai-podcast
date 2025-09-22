@@ -11,20 +11,22 @@ const AdminMode = () => {
                     <div className="logo">SUPERSTAR PODCAST HUB</div>
                      <div className="subtitle">Admin Dashboard</div>
                 </div>
-                 <Button onClick={() => router.push('/')}>Go Home</Button>
+                <div className="flex gap-2">
+                    <Button onClick={() => router.push('/maintenance-log')}>Maintenance Log</Button>
+                    <Button onClick={() => router.push('/')}>Go Home</Button>
+                </div>
             </div>
             <div className="admin-panel">
                 <div className="admin-card">
                     <h3>Platform Statistics</h3>
                     <div className="stat-row"><span>Total Users:</span> <strong>15,789</strong></div>
-                    <div className="stat-row"><span>Live Channels:</span> <strong>2</strong></div>
+                    <div className="stat-row"><span>Live Channels:</span> <strong>1</strong></div>
                     <div className="stat-row"><span>Peak Viewers (24h):</span> <strong>8,192</strong></div>
                     <div className="stat-row"><span>Server Uptime:</span> <strong>99.98%</strong></div>
                 </div>
                 <div className="admin-card">
                     <h3>Live Channels</h3>
-                    <div className="stat-row"><span>IndieVibe FM</span> <button className="control-btn danger">Shutdown</button></div>
-                    <div className="stat-row"><span>RealTalk 24/7</span> <button className="control-btn danger">Shutdown</button></div>
+                    <div className="stat-row"><span>The Main Event</span> <button className="control-btn danger">Shutdown</button></div>
                 </div>
                  <div className="admin-card">
                     <h3>System Control</h3>
