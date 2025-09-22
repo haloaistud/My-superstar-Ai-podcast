@@ -13,7 +13,7 @@ const AdminMode = () => {
                 </div>
                 <div className="flex gap-2">
                     <Button onClick={() => router.push('/maintenance-log')}>Maintenance Log</Button>
-                    <Button onClick={() => router.push('/')}>Go Home</Button>
+                    <Button onClick={() => router.push('/dashboard')}>Go to App</Button>
                 </div>
             </div>
             <div className="admin-panel">

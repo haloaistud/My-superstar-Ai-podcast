@@ -1,148 +1,101 @@
-'use client';
-
-import * as React from 'react';
-import { Clapperboard, Eye, Settings, Users, Video, Search, ListMusic, UserPlus, Star } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
-import { ChatPanel } from '@/components/chat-panel';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { DonationPanel } from '@/components/donation-panel';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { StreamerList } from '@/components/streamer-list';
-import { GuestQueue } from '@/components/guest-queue';
+const WelcomePage = () => {
+    return (
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-sans">
 
-type Role = 'viewer' | 'broadcaster' | 'admin';
-
-const ViewerMode = () => {
-  const [isPlaying, setIsPlaying] = React.useState(false);
-
-  const togglePlayback = () => setIsPlaying(!isPlaying);
-
-  return (
-    <div id="viewerMode" className="main-content active">
-      <div className="viewer-grid">
-        <div className="lg:col-span-2">
-            <div
-              className={`video-player ${
-                isPlaying ? 'playing' : ''
-              }`}
-              id="videoPlayer"
-            >
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
-                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
-                  <Users className="h-4 w-4" /> 8,192
+            {/* Hero Section */}
+            <section className="min-h-screen flex flex-col justify-center items-center text-center px-4">
+                <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-400 animate-bounce">
+                    Your Stage. Your Story. Your Superstar Podcast
+                </h1>
+                <p className="text-xl md:text-2xl mb-8 max-w-2xl">
+                    Stream Live, Share Everywhere, Shine Forever. Broadcast across
+                    <span className="font-bold underline decoration-yellow-300"> YouTube, Facebook, X, Instagram, TikTok</span> and more.
+                    Join conversations, interact with fans, or step in as a guest on top shows!
+                </p>
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <Link href="/dashboard">
+                    <span className="cursor-pointer bg-yellow-400 text-purple-900 px-8 py-4 rounded-full font-bold shadow-lg transform hover:scale-110 hover:bg-yellow-500 transition-all duration-300">
+                        Go to App
+                    </span>
+                  </Link>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
-                  <Video className="h-4 w-4" /> 1080p
+                <div className="flex flex-col md:flex-row gap-6 text-left text-white max-w-4xl">
+                    <div className="bg-white bg-opacity-10 p-4 rounded-lg shadow-md hover:bg-opacity-20 transition">
+                        <h3 className="font-bold text-lg mb-2">🎙️ Aspiring Podcasters</h3>
+                        <p>Start your show instantly and broadcast live with zero setup hassle.</p>
+                    </div>
+                    <div className="bg-white bg-opacity-10 p-4 rounded-lg shadow-md hover:bg-opacity-20 transition">
+                        <h3 className="font-bold text-lg mb-2">🌍 Global Audience</h3>
+                        <p>Reach fans worldwide by streaming simultaneously to multiple platforms.</p>
+                    </div>
+                    <div className="bg-white bg-opacity-10 p-4 rounded-lg shadow-md hover:bg-opacity-20 transition">
+                        <h3 className="font-bold text-lg mb-2">🏆 Build Your Brand</h3>
+                        <p>Monetize your show, gain followers, and grow a loyal community.</p>
+                    </div>
                 </div>
-              </div>
-              <button
-                className="play-button z-10"
-                id="playButton"
-                onClick={togglePlayback}
-              >
-                {isPlaying ? '❚❚' : '▶️'}
-              </button>
-              <div className="channel-info">
-                  <h3 className="font-bold text-lg">🎙️ The Main Event: RealTalk 24/7</h3>
-                  <p className="text-sm opacity-80">
-                    Raw conversations, interviews, and real talk about life, culture, and everything in between.
-                  </p>
-              </div>
-               {isPlaying && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-              )}
-            </div>
+            </section>
+
+            {/* Features Section */}
+            <section className="bg-white text-gray-900 py-20">
+                <div className="max-w-6xl mx-auto px-6">
+                    <h2 className="text-4xl font-bold text-center mb-12">Why Choose MySuperstarAIpodcast?</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        <div className="bg-purple-600 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Start Your Own Show Instantly</h3>
+                            <p>Launch your podcast with zero setup hassle — record live, schedule episodes, or create on-demand content.</p>
+                        </div>
+                        <div className="bg-indigo-600 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Stream Across Platforms</h3>
+                            <p>Simultaneously broadcast to YouTube, Facebook, X, Instagram, TikTok, and more.</p>
+                        </div>
+                        <div className="bg-purple-500 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Engage Listeners in Real-Time</h3>
+                            <p>Interact with fans through live chat, polls, Q&As, and shoutouts — turn listeners into loyal community members.</p>
+                        </div>
+                        <div className="bg-indigo-500 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Invite Guests & Co-Hosts</h3>
+                            <p>Collaborate with friends, influencers, or industry experts — host interviews, panels, or joint live streams.</p>
+                        </div>
+                        <div className="bg-purple-400 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Grow Your Audience</h3>
+                            <p>Gain followers, get featured in curated discovery sections, and track analytics to optimize your content.</p>
+                        </div>
+                        <div className="bg-indigo-400 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Monetize & Build Your Brand</h3>
+                            <p>Use sponsorships, listener support, and premium content options — turn your podcast into a profitable venture.</p>
+                        </div>
+                        <div className="bg-purple-300 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Host Interactive Events</h3>
+                            <p>Run live workshops, fan meetups, Q&A sessions, or community debates — bring people together virtually.</p>
+                        </div>
+                        <div className="bg-indigo-300 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Discover Trending Content</h3>
+                            <p>Find top podcasts, trending topics, and niche communities that match your interests and grow your knowledge.</p>
+                        </div>
+                        <div className="bg-purple-200 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+                            <h3 className="text-2xl font-semibold mb-2">Learn & Improve Your Skills</h3>
+                            <p>Access tips, tutorials, and insights from top creators — improve your content creation, streaming, and engagement skills.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer / Call to Action */}
+            <footer className="bg-gray-900 text-white py-12 text-center">
+                <h3 className="text-2xl font-bold mb-4">Ready to Become a Superstar?</h3>
+                <p className="mb-6">Go to the app and start streaming your story to the world today!</p>
+                <div className="flex justify-center gap-4">
+                  <Link href="/dashboard">
+                    <span className="cursor-pointer bg-yellow-400 text-purple-900 px-8 py-3 rounded-full font-bold hover:bg-yellow-500 transition">Go to App</span>
+                  </Link>
+                </div>
+            </footer>
+
         </div>
-        <div className="space-y-8">
-            <Tabs defaultValue="chat" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="chat">💬 Chat</TabsTrigger>
-                <TabsTrigger value="streamers">
-                  <ListMusic className="mr-2 h-4 w-4" /> Streamers
-                </TabsTrigger>
-                <TabsTrigger value="queue">
-                  <UserPlus className="mr-2 h-4 w-4" /> Queue
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="chat" className="flex-grow">
-                <ChatPanel />
-              </TabsContent>
-              <TabsContent value="streamers">
-                <StreamerList />
-              </TabsContent>
-              <TabsContent value="queue">
-                <GuestQueue />
-              </TabsContent>
-            </Tabs>
-            <DonationPanel />
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
-export default function Home() {
-  const [role, setRole] = React.useState<Role>('viewer');
-
-  const switchRole = (newRole: Role) => {
-    if (newRole === 'broadcaster') {
-      window.location.href = '/login';
-    } else if (newRole === 'admin') {
-      window.location.href = '/admin';
-    } else {
-      setRole(newRole);
-    }
-  };
-
-  return (
-    <div className="container">
-      <div className="header">
-        <div className="header-content">
-          <div className="logo">MySuperstar AI podcast</div>
-          <p className="max-w-2xl mx-auto my-4 text-center text-lg text-muted-foreground">
-            Welcome to the ultimate destination for live podcasting. Discover new streamers, join the conversation, and even become a guest on the show.
-          </p>
-          <div className="flex justify-center">
-            <Link href="/welcome">
-              <Button>
-                <Star className="w-5 h-5 mr-2" /> View Welcome Page
-              </Button>
-            </Link>
-          </div>
-          <div className="relative mx-auto max-w-md my-6">
-              <Input type="search" placeholder="Search for streamers or topics..." className="w-full !pl-10" />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-          <div className="subtitle">
-            Your Serverless Link to the World. Stream, Connect, Grow.
-          </div>
-
-          <div className="role-selector">
-            <button
-              className={`role-btn viewer ${role === 'viewer' ? 'active' : ''}`}
-              onClick={() => switchRole('viewer')}
-            >
-              <Eye className="w-5 h-5 mr-2" /> Viewer Mode
-            </button>
-            <button
-              className={`role-btn broadcaster`}
-              onClick={() => switchRole('broadcaster')}
-            >
-              <Clapperboard className="w-5 h-5 mr-2" /> Broadcaster Mode
-            </button>
-            <button
-              className={`role-btn admin`}
-              onClick={() => switchRole('admin')}
-            >
-              <Settings className="w-5 h-5 mr-2" /> Admin Mode
-            </button>
-          </div>
-        </div>
-      </div>
-      <ViewerMode />
-    </div>
-  );
-}
+export default WelcomePage;

@@ -86,7 +86,7 @@ export default function MaintenanceLogPage() {
         </div>
         <div className="flex gap-2 justify-center">
             <Button onClick={() => router.push('/admin')}>Admin Dashboard</Button>
-            <Button onClick={() => router.push('/')}>Go Home</Button>
+            <Button onClick={() => router.push('/dashboard')}>Go to App</Button>
         </div>
       </div>
 

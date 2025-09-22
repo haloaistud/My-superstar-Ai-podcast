@@ -73,8 +73,8 @@ export default function LoginPage() {
                         </Button>
                     </form>
                      <div className="mt-4 text-center text-sm">
-                        <Button variant="link" onClick={() => router.push('/')}>
-                            Back to Home
+                        <Button variant="link" onClick={() => router.push('/dashboard')}>
+                            Back to App
                         </Button>
                     </div>
                 </CardContent>

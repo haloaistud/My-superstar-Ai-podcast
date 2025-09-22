@@ -52,7 +52,7 @@ const BroadcasterDashboard: React.FC = () => {
 
     const handleLogout = () => {
         sessionStorage.removeItem('isLoggedIn');
-        router.push('/');
+        router.push('/dashboard');
     };
 
     return (
