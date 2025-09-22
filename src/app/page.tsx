@@ -8,7 +8,7 @@ const WelcomePage = () => {
             {/* Hero Section */}
             <section className="min-h-screen flex flex-col justify-center items-center text-center px-4">
                 <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-400 animate-bounce">
-                    Your Stage. Your Story. Your Superstar Podcast
+                    MySuperstarAIpodcast: Your Stage. Your Story. Your Views. Your Podcast. You Superstar.
                 </h1>
                 <p className="text-xl md:text-2xl mb-8 max-w-2xl">
                     Stream Live, Share Everywhere, Shine Forever. Broadcast across
