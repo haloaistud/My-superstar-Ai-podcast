@@ -6,6 +6,7 @@ import { Clapperboard, Eye, Settings, Users, Video, Mic } from 'lucide-react';
 import { ChatPanel } from '@/components/chat-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { DonationPanel } from '@/components/donation-panel';
 
 type Role = 'viewer' | 'broadcaster' | 'admin';
 
@@ -63,7 +64,10 @@ const ViewerMode = () => {
             </div>
           </CardContent>
         </Card>
-        <ChatPanel />
+        <div className="space-y-8">
+            <ChatPanel />
+            <DonationPanel />
+        </div>
       </div>
     </div>
   );
