@@ -1,57 +1,14 @@
-// All client-side code, since we're using hooks and event handlers.
 'use client';
 
 import * as React from 'react';
 import {
-  Archive,
   Clapperboard,
   Eye,
-  Facebook,
-  LayoutGrid,
-  MessageSquare,
-  Mic,
   Settings,
-  Sparkles,
-  Twitch,
   Users,
-  Youtube,
-  Menu,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import Image from 'next/image';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
-import { PlatformRecommender } from '@/components/platform-recommender';
-import { ContentSuggester } from '@/components/content-suggester';
+
 import { ChatPanel } from '@/components/chat-panel';
-import { ArchiveList } from '@/components/archive-list';
-import { MonetizationSettings } from '@/components/monetization-settings';
 
 type Role = 'viewer' | 'broadcaster' | 'admin';
 
@@ -80,7 +37,9 @@ const ViewerMode = () => {
                 </div>
                 <div className="channel-description">{description}</div>
                 <div className="channel-stats">
-                    <div className="stat-item">👥 <span>{viewers.toLocaleString()}</span> {status === 'SCHEDULED' ? 'waiting' : (type === 'Audio Only' ? 'listening' : 'watching')}</div>
+                    <div className="stat-item">
+                        <Users className="h-4 w-4" /> <span>{viewers.toLocaleString()}</span> {status === 'SCHEDULED' ? 'waiting' : (type === '🎵 Audio Only' ? 'listening' : 'watching')}
+                    </div>
                     <div className="stat-item">{type.startsWith('📹') ? '📹 Video + Audio' : '🎵 Audio Only'}</div>
                     <div className="stat-item">⏱️ {time}</div>
                 </div>
@@ -125,77 +84,23 @@ const ViewerMode = () => {
                         <span id="currentChannelInfo">{currentChannel?.name || 'Select a channel to start listening'}</span>
                     </div>
                 </div>
-                {/* We'll use the ChatPanel component we already have, adapting it later */}
                 <ChatPanel />
             </div>
         </div>
     );
 };
 
-const BroadcasterMode = () => (
-    <div id="broadcasterMode" className="main-content">
-        <div className="streaming-panel">
-             <div className="streaming-controls">
-                <button className="big-btn start">🚀 Start Streaming</button>
-                <button className="big-btn stop">🛑 Stop Streaming</button>
-            </div>
-            <div className="audio-visualizer">
-                {Array.from({length: 30}).map((_, i) => (
-                    <div key={i} className="audio-bar" style={{animationDelay: `${i * 0.05}s`}}></div>
-                ))}
-            </div>
-        </div>
-        <div className="viewer-grid">
-            <div className="video-player playing">
-                <div className="channel-info">Your Stream Preview</div>
-            </div>
-            <ChatPanel />
-        </div>
-    </div>
-);
-
-const AdminMode = () => (
-    <div id="adminMode" className="main-content">
-        <div className="admin-panel">
-            <div className="admin-card">
-                <h3>Platform Statistics</h3>
-                <div className="stat-row"><span>Total Users:</span> <strong>15,789</strong></div>
-                <div className="stat-row"><span>Live Channels:</span> <strong>2</strong></div>
-                <div className="stat-row"><span>Peak Viewers (24h):</span> <strong>8,192</strong></div>
-                <div className="stat-row"><span>Server Uptime:</span> <strong>99.98%</strong></div>
-            </div>
-            <div className="admin-card">
-                <h3>Live Channels</h3>
-                <div className="stat-row"><span>IndieVibe FM</span> <button className="control-btn danger">Shutdown</button></div>
-                <div className="stat-row"><span>RealTalk 24/7</span> <button className="control-btn danger">Shutdown</button></div>
-            </div>
-             <div className="admin-card">
-                <h3>System Control</h3>
-                <button className="control-btn">Reboot Media Server</button>
-                <button className="control-btn success mt-2">Send Global Notification</button>
-            </div>
-        </div>
-    </div>
-);
-
-
 export default function Home() {
     const [role, setRole] = React.useState<Role>('viewer');
 
     const switchRole = (newRole: Role) => {
-        setRole(newRole);
-    };
-
-    const renderContent = () => {
-        switch (role) {
-            case 'viewer':
-                return <ViewerMode />;
-            case 'broadcaster':
-                return <BroadcasterMode />;
-            case 'admin':
-                return <AdminMode />;
-            default:
-                return <ViewerMode />;
+        if (newRole === 'broadcaster') {
+            window.location.href = '/login';
+        } else if (newRole === 'admin') {
+            window.location.href = '/admin';
+        }
+        else {
+            setRole(newRole);
         }
     };
 
@@ -208,18 +113,18 @@ export default function Home() {
 
                     <div className="role-selector">
                         <button className={`role-btn viewer ${role === 'viewer' ? 'active' : ''}`} onClick={() => switchRole('viewer')}>
-                            👀 Viewer Mode
+                            <Eye className="w-5 h-5 mr-2" /> Viewer Mode
                         </button>
-                        <button className={`role-btn broadcaster ${role === 'broadcaster' ? 'active' : ''}`} onClick={() => switchRole('broadcaster')}>
-                            🎙️ Broadcaster Mode
+                        <button className={`role-btn broadcaster`} onClick={() => switchRole('broadcaster')}>
+                            <Clapperboard className="w-5 h-5 mr-2" /> Broadcaster Mode
                         </button>
-                        <button className={`role-btn admin ${role === 'admin' ? 'active' : ''}`} onClick={() => switchRole('admin')}>
-                            ⚙️ Admin Mode
+                        <button className={`role-btn admin`} onClick={() => switchRole('admin')}>
+                           <Settings className="w-5 h-5 mr-2" /> Admin Mode
                         </button>
                     </div>
                 </div>
             </div>
-            {renderContent()}
+            <ViewerMode />
         </div>
     );
 }

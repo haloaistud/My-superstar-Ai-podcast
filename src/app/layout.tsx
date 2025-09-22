@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: '🌟 Superstar Podcast Hub',
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <main>{children}</main>
+        <Toaster />
         <div id="notifications" className="notifications"></div>
       </body>
     </html>
