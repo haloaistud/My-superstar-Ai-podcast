@@ -100,7 +100,7 @@ export default function Home() {
     <div className="container">
       <div className="header">
         <div className="header-content">
-          <div className="logo">Superstar Stream Center</div>
+          <div className="logo">MySuperstar AI podcast</div>
           <p className="max-w-2xl mx-auto my-4 text-center text-lg text-muted-foreground">
             Welcome to the ultimate destination for live podcasting. Discover new streamers, join the conversation, and even become a guest on the show.
           </p>
