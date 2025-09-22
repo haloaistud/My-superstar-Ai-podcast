@@ -1,12 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { Clapperboard, Eye, Settings, Users, Video, Mic } from 'lucide-react';
+import { Clapperboard, Eye, Settings, Users, Video, Mic, Search, ListMusic, UserPlus } from 'lucide-react';
 
 import { ChatPanel } from '@/components/chat-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DonationPanel } from '@/components/donation-panel';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { StreamerList } from '@/components/streamer-list';
+import { GuestQueue } from '@/components/guest-queue';
 
 type Role = 'viewer' | 'broadcaster' | 'admin';
 
@@ -65,7 +69,26 @@ const ViewerMode = () => {
           </CardContent>
         </Card>
         <div className="space-y-8">
-            <ChatPanel />
+            <Tabs defaultValue="chat">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="chat">💬 Chat</TabsTrigger>
+                <TabsTrigger value="streamers">
+                  <ListMusic className="mr-2 h-4 w-4" /> Streamers
+                </TabsTrigger>
+                <TabsTrigger value="queue">
+                  <UserPlus className="mr-2 h-4 w-4" /> Queue
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="chat">
+                <ChatPanel />
+              </TabsContent>
+              <TabsContent value="streamers">
+                <StreamerList />
+              </TabsContent>
+              <TabsContent value="queue">
+                <GuestQueue />
+              </TabsContent>
+            </Tabs>
             <DonationPanel />
         </div>
       </div>
@@ -90,7 +113,14 @@ export default function Home() {
     <div className="container">
       <div className="header">
         <div className="header-content">
-          <div className="logo">🌟 SUPERSTAR PODCAST HUB</div>
+          <div className="logo">Superstar Podcast Hub</div>
+          <p className="max-w-2xl mx-auto my-4 text-center text-lg text-gray-300">
+            Welcome to the ultimate destination for live podcasting. Discover new streamers, join the conversation, and even become a guest on the show.
+          </p>
+          <div className="relative mx-auto max-w-md my-6">
+              <Input type="search" placeholder="Search for streamers or topics..." className="w-full !pl-10" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          </div>
           <div className="subtitle">
             Your Serverless Link to the World. Stream, Connect, Grow.
           </div>

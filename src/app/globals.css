@@ -51,7 +51,8 @@ body {
 }
 
 .logo {
-    font-size: 3em;
+    font-family: var(--font-headline);
+    font-size: 3.5em;
     margin-bottom: 10px;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
     -webkit-background-clip: text;
