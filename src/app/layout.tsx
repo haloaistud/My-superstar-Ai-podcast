@@ -1,28 +1,20 @@
-import type { Metadata } from 'next';
-import { Toaster } from "@/components/ui/toaster"
-import './globals.css';
+import './globals.css'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Superstar Stream Center',
-  description: 'Your all-in-one platform for live broadcasting and content creation.',
-};
+  title: '🎙️ Podcast Dashboard',
+  description: 'Stream, summarize, and explore episodes with Claude AI',
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased">
-        {children}
-        <Toaster />
+    <html lang="en">
+      <body>
+        <header>
+          <h1>Podcast App</h1>
+        </header>
+        <main>{children}</main>
       </body>
     </html>
-  );
+  )
 }
