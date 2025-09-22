@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-headline' });
 
 export const metadata: Metadata = {
-  title: '🌟 Superstar Stream Center',
-  description: 'Your Serverless Link to the World. Stream, Connect, Grow.',
+  title: 'MySuperstarAIpodcast | Live Streaming Made Easy',
+  description: 'Your Stage. Your Story. Your Superstar Podcast — Stream Live, Share Everywhere, Shine Forever.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

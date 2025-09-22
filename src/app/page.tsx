@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { Clapperboard, Eye, Settings, Users, Video, Search, ListMusic, UserPlus } from 'lucide-react';
+import { Clapperboard, Eye, Settings, Users, Video, Search, ListMusic, UserPlus, Star } from 'lucide-react';
+import Link from 'next/link';
 
 import { ChatPanel } from '@/components/chat-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -104,6 +105,13 @@ export default function Home() {
           <p className="max-w-2xl mx-auto my-4 text-center text-lg text-muted-foreground">
             Welcome to the ultimate destination for live podcasting. Discover new streamers, join the conversation, and even become a guest on the show.
           </p>
+          <div className="flex justify-center">
+            <Link href="/welcome">
+              <Button>
+                <Star className="w-5 h-5 mr-2" /> View Welcome Page
+              </Button>
+            </Link>
+          </div>
           <div className="relative mx-auto max-w-md my-6">
               <Input type="search" placeholder="Search for streamers or topics..." className="w-full !pl-10" />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
